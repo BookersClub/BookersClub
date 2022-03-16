@@ -1,3 +1,4 @@
+using BookersClub.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -5,6 +6,14 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AutoMapper;
+using System;
+using System.IO;
+using Microsoft.EntityFrameworkCore;
+using BookersClub.Service.Interface;
+using BookersClub.Service.ApplicationService;
+using BookersClub.Domain.Service;
+using BookersClub.Domain.Interface;
 
 namespace BookersClub
 {
@@ -21,7 +30,21 @@ namespace BookersClub
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddDbContextPool<BookersClubDBContext>(options =>
+            {
+
+                options.UseSqlServer(Configuration.GetConnectionString("BookersClubDb"),
+                    x => x.UseNetTopologySuite());
+            });
+
             services.AddControllersWithViews();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddScoped<IUserApplicationService, UserApplicationService>();
+
+
+            services.AddScoped<IUserService, UserService>();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
