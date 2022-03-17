@@ -14,11 +14,18 @@ using BookersClub.Service.Interface;
 using BookersClub.Service.ApplicationService;
 using BookersClub.Domain.Service;
 using BookersClub.Domain.Interface;
+using Serilog;
 
 namespace BookersClub
 {
     public class Startup
     {
+        public static IConfiguration configuration { get; } = new ConfigurationBuilder()
+       .SetBasePath(Directory.GetCurrentDirectory())
+       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+       .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+       .Build();
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -29,6 +36,12 @@ namespace BookersClub
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Log.Logger = new LoggerConfiguration().ReadFrom.
+             Configuration(configuration)
+            .CreateLogger();
+
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => Log.CloseAndFlush();
+            services.AddSingleton(Log.Logger);
 
             services.AddDbContextPool<BookersClubDBContext>(options =>
             {
@@ -71,6 +84,7 @@ namespace BookersClub
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            app.UseSerilogRequestLogging();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
