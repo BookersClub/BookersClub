@@ -15,12 +15,13 @@ export class Login extends Component {
                     <input className="User" type="text" />
                 </div>
                 <div>
-                    <label>Password</label>
+                    <label>Enter Password</label>
                     <input className="User"type="text" />
                 </div>
                 <div>
                     <input type="submit" />
                 </div>
+                
             </div>
         );
 
